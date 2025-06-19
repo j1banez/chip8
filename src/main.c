@@ -129,43 +129,43 @@ int main()
 
     while (running)
     {
-      // TODO: Cap at 60 FPS
+        // TODO: Cap at 60 FPS
 
-      // Handle inputs
-      while (SDL_PollEvent(&event)) {
-          switch (event.type) {
-              case SDL_QUIT:
-                  running = false;
-                  break;
-              case SDL_KEYDOWN:
-                  if (event.key.keysym.sym == SDLK_ESCAPE) {
-                      running = false;
-                  } else {
-                      printf("Key down: %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                      int mapped = map_sdl_key(event.key.keysym.sym);
-                      if (mapped != -1) key[mapped] = 1; // Set key state to pressed
-                  }
-                  break;
-              case SDL_KEYUP:
-                  printf("Key up: %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                  int mapped = map_sdl_key(event.key.keysym.sym);
-                  if (mapped != -1) key[mapped] = 0; // Set key state to released
-                  break;
-              default:
-                  break;
-          }
-      }
+        // Handle inputs
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    running = false;
+                    break;
+                case SDL_KEYDOWN:
+                    if (event.key.keysym.sym == SDLK_ESCAPE) {
+                        running = false;
+                    } else {
+                        printf("Key down: %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                        int mapped = map_sdl_key(event.key.keysym.sym);
+                        if (mapped != -1) key[mapped] = 1; // Set key state to pressed
+                    }
+                    break;
+                case SDL_KEYUP:
+                    printf("Key up: %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                    int mapped = map_sdl_key(event.key.keysym.sym);
+                    if (mapped != -1) key[mapped] = 0; // Set key state to released
+                    break;
+                default:
+                    break;
+            }
+        }
 
-      cycle();
+        cycle();
 
-      if (drawFlag) {
-          SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-          SDL_RenderClear(renderer);
-          draw();
-          SDL_RenderPresent(renderer);
+        if (drawFlag) {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            draw();
+            SDL_RenderPresent(renderer);
 
-          drawFlag = 0;
-      }
+            drawFlag = 0;
+        }
     }
 
     SDL_DestroyRenderer(renderer);
