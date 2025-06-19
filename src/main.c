@@ -46,10 +46,23 @@ void init()
 
 void cycle()
 {
-  // TODO: Fetch
-  // TODO: Decode
-  // TODO: Execute
-  // TODO: Update timers
+  // Fetch opcode
+  opcode = memory[pc] << 8 | memory[pc + 1];
+  printf("opcode: 0x%X\n", opcode);
+
+  // Decode opcode and execute
+  switch(opcode & 0xF000)
+  {
+    default:
+      printf("Unknown opcode: 0x%X\n", opcode);
+  }
+
+  if (delay_timer > 0) delay_timer--;
+  if (sound_timer > 0)
+  {
+    if (sound_timer == 1) printf("BEEP!\n");
+    sound_timer--;
+  }
 }
 
 void draw()
