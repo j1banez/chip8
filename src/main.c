@@ -5,6 +5,8 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 320
 
+const int FRAME_DELAY = 1000 / 60; // ~16.67 ms per frame (60 FPS)
+
 typedef unsigned char t_byte;
 typedef unsigned short t_word;
 
@@ -126,10 +128,11 @@ int main()
 
     bool running = true;
     SDL_Event event;
+    int frame_start, frame_time;
 
     while (running)
     {
-        // TODO: Cap at 60 FPS
+        frame_start = SDL_GetTicks();
 
         // Handle inputs
         while (SDL_PollEvent(&event)) {
@@ -141,13 +144,13 @@ int main()
                     if (event.key.keysym.sym == SDLK_ESCAPE) {
                         running = false;
                     } else {
-                        printf("Key down: %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                        // printf("Key down: %s\n", SDL_GetKeyName(event.key.keysym.sym));
                         int mapped = map_sdl_key(event.key.keysym.sym);
                         if (mapped != -1) key[mapped] = 1; // Set key state to pressed
                     }
                     break;
                 case SDL_KEYUP:
-                    printf("Key up: %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                    // printf("Key up: %s\n", SDL_GetKeyName(event.key.keysym.sym));
                     int mapped = map_sdl_key(event.key.keysym.sym);
                     if (mapped != -1) key[mapped] = 0; // Set key state to released
                     break;
@@ -165,6 +168,12 @@ int main()
             SDL_RenderPresent(renderer);
 
             drawFlag = 0;
+        }
+
+        // Delay to maintain frame rate at ~60 FPS
+        frame_time = SDL_GetTicks() - frame_start;
+        if (frame_time < FRAME_DELAY) {
+            SDL_Delay(FRAME_DELAY - frame_time);
         }
     }
 
