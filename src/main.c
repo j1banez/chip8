@@ -136,6 +136,8 @@ int main()
 
         // Handle inputs
         while (SDL_PollEvent(&event)) {
+            int mapped;
+
             switch (event.type) {
                 case SDL_QUIT:
                     running = false;
@@ -145,13 +147,13 @@ int main()
                         running = false;
                     } else {
                         // printf("Key down: %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                        int mapped = map_sdl_key(event.key.keysym.sym);
+                        mapped = map_sdl_key(event.key.keysym.sym);
                         if (mapped != -1) key[mapped] = 1; // Set key state to pressed
                     }
                     break;
                 case SDL_KEYUP:
                     // printf("Key up: %s\n", SDL_GetKeyName(event.key.keysym.sym));
-                    int mapped = map_sdl_key(event.key.keysym.sym);
+                    mapped = map_sdl_key(event.key.keysym.sym);
                     if (mapped != -1) key[mapped] = 0; // Set key state to released
                     break;
                 default:
