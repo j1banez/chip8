@@ -1,4 +1,9 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include <SDL2/SDL.h>
+
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 320
 
 typedef unsigned char t_byte;
 typedef unsigned short t_word;
@@ -21,7 +26,8 @@ t_byte sound_timer;
 t_byte key[16]; // Keypad state, 0 if not pressed, 1 if pressed
 
 t_byte gfx[64 * 32]; // Screen buffer
-int drawFlag;
+bool drawFlag;
+SDL_Renderer* renderer;
 
 void init()
 {
@@ -40,19 +46,20 @@ void init()
         stack[i] = 0;
     }
 
-    drawFlag = 1;
+    drawFlag = true;
 }
 
 void cycle()
 {
     // Fetch opcode
     opcode = memory[pc] << 8 | memory[pc + 1];
-    printf("opcode: 0x%X\n", opcode);
+    //printf("opcode: 0x%X\n", opcode);
 
     // Decode opcode and execute
     switch(opcode & 0xF000) {
         default:
-            printf("Unknown opcode: 0x%X\n", opcode);
+            //printf("Unknown opcode: 0x%X\n", opcode);
+            break;
     }
 
     if (delay_timer > 0) delay_timer--;
@@ -62,14 +69,45 @@ void cycle()
     }
 }
 
-void draw()
-{
-
+/*
+** Map SDL keys to Chip-8 keys
+**
+** 1 2 3 4 -> 1 2 3 C
+** Q W E R -> 4 5 6 D
+** A S D F -> 7 8 9 E
+** Z X C V -> A 0 B F
+*/
+int map_sdl_key(SDL_Keycode key) {
+    switch (key) {
+        case SDLK_1: return 0x1;
+        case SDLK_2: return 0x2;
+        case SDLK_3: return 0x3;
+        case SDLK_4: return 0xC;
+        case SDLK_q: return 0x4;
+        case SDLK_w: return 0x5;
+        case SDLK_e: return 0x6;
+        case SDLK_r: return 0xD;
+        case SDLK_a: return 0x7;
+        case SDLK_s: return 0x8;
+        case SDLK_d: return 0x9;
+        case SDLK_f: return 0xE;
+        case SDLK_z: return 0xA;
+        case SDLK_x: return 0x0;
+        case SDLK_c: return 0xB;
+        case SDLK_v: return 0xF;
+        default: return -1;
+    }
 }
 
-void set_keys()
+/*
+** Draw the screen buffer to the SDL renderer
+*/
+void draw()
 {
-
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    // TODO: use gfx array to draw pixels
+    SDL_Rect pixel = {10, 10, 10, 10};
+    SDL_RenderFillRect(renderer, &pixel);
 }
 
 int main()
@@ -77,23 +115,61 @@ int main()
     printf("chip8\n");
 
     init();
-
-    // TODO: Setup graphics
-    // TODO: Setup inputs
     // TODO: Load game
+    SDL_Init(SDL_INIT_VIDEO);
 
-    while (42) {
-        // TODO: Cap at 60 FPS
-        cycle();
+    SDL_Window* window = SDL_CreateWindow("Chip-8",
+      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+      SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
-        if (drawFlag)
-        {
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+    bool running = true;
+    SDL_Event event;
+
+    while (running)
+    {
+      // TODO: Cap at 60 FPS
+
+      // Handle inputs
+      while (SDL_PollEvent(&event)) {
+          switch (event.type) {
+              case SDL_QUIT:
+                  running = false;
+                  break;
+              case SDL_KEYDOWN:
+                  if (event.key.keysym.sym == SDLK_ESCAPE) {
+                      running = false;
+                  } else {
+                      printf("Key down: %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                      int mapped = map_sdl_key(event.key.keysym.sym);
+                      if (mapped != -1) key[mapped] = 1; // Set key state to pressed
+                  }
+                  break;
+              case SDL_KEYUP:
+                  printf("Key up: %s\n", SDL_GetKeyName(event.key.keysym.sym));
+                  int mapped = map_sdl_key(event.key.keysym.sym);
+                  if (mapped != -1) key[mapped] = 0; // Set key state to released
+                  break;
+              default:
+                  break;
+          }
+      }
+
+      cycle();
+
+      if (drawFlag) {
+          SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+          SDL_RenderClear(renderer);
           draw();
-          drawFlag = 0;
-        }
+          SDL_RenderPresent(renderer);
 
-        set_keys();
+          drawFlag = 0;
+      }
     }
 
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }

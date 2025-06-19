@@ -10,13 +10,15 @@ INC_DIRS := $(shell find $(SRC_DIR) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CC := gcc
-CFLAGS := -Wall -Wextra -Werror
+SDL2_CFLAGS := $(shell sdl2-config --cflags)
+SDL2_LIBS := $(shell sdl2-config --libs)
+CFLAGS := -Wall -Wextra -Werror $(SDL2_CFLAGS)
 OFLAGS :=
 CPPFLAGS := $(INC_FLAGS) -MMD -MP
-LDFLAGS :=
+LDFLAGS := $(SDL2_LIBS)
 
 $(NAME): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(BUILD_DIR)/%.c.o: %.c
 	@mkdir -p $(dir $@)
