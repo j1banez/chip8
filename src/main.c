@@ -51,6 +51,18 @@ void init()
     drawFlag = true;
 }
 
+int load_game(const char* filename)
+{
+    FILE* file = fopen(filename, "rb");
+    if (!file) return 1;
+
+    // Load game into memory starting at 0x200
+    fread(memory + 0x200, sizeof(t_byte), 4096 - 0x200, file);
+    fclose(file);
+
+    return 0;
+}
+
 void cycle()
 {
     // Fetch opcode
@@ -112,12 +124,20 @@ void draw()
     SDL_RenderFillRect(renderer, &pixel);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    printf("chip8\n");
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <chip8_rom>\n", argv[0]);
+        return 1;
+    }
 
     init();
-    // TODO: Load game
+
+    if (load_game(argv[1]) == 1) {
+        fprintf(stderr, "Failed to load game: %s\n", argv[1]);
+        return 1;
+    }
+
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window* window = SDL_CreateWindow("Chip-8",
@@ -129,6 +149,8 @@ int main()
     bool running = true;
     SDL_Event event;
     int frame_start, frame_time;
+
+    printf("Press ESC to exit.\n");
 
     while (running)
     {
