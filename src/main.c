@@ -4,6 +4,7 @@
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 320
+#define CYCLES_PER_SECOND 600
 
 const int FRAME_DELAY = 1000 / 60; // ~16.67 ms per frame (60 FPS)
 
@@ -67,19 +68,32 @@ void cycle()
 {
     // Fetch opcode
     opcode = memory[pc] << 8 | memory[pc + 1];
-    //printf("opcode: 0x%X\n", opcode);
 
     // Decode opcode and execute
     switch(opcode & 0xF000) {
-        default:
-            //printf("Unknown opcode: 0x%X\n", opcode);
+        case 0x0000:
+            switch (opcode & 0x00FF) {
+                case 0x00E0: // 0x00E0 - CLS - Clear the screen
+                    for (int i = 0; i < 2048; i++) gfx[i] = 0;
+                    drawFlag = true;
+                    pc += 2;
+                    break;
+                case 0x00EE: // 0x00EE - RET - Return from subroutine
+                    if (sp == 0) {
+                        printf("Stack underflow!\n");
+                        return;
+                    }
+                    pc = stack[sp];
+                    sp--;
+                    break;
+                default:
+                    printf("Unknown opcode: 0x%X\n", opcode);
+                    break;
+            }
             break;
-    }
-
-    if (delay_timer > 0) delay_timer--;
-    if (sound_timer > 0) {
-        if (sound_timer == 1) printf("BEEP!\n");
-        sound_timer--;
+        default:
+            printf("Unknown opcode: 0x%X\n", opcode);
+            break;
     }
 }
 
@@ -183,7 +197,13 @@ int main(int argc, char* argv[])
             }
         }
 
-        cycle();
+        for (int i = 0; i < (CYCLES_PER_SECOND / 60); i++) cycle();
+
+        if (delay_timer > 0) delay_timer--;
+        if (sound_timer > 0) {
+            printf("BEEP!\n");
+            sound_timer--;
+        }
 
         if (drawFlag) {
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
