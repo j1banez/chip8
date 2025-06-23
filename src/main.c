@@ -130,6 +130,12 @@ void cycle()
             }
             pc += 2;
             break;
+        case 0x4000: // 4XKK - SNE Vx, byte - Skip next instruction if Vx != kk
+            if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
+              pc += 2;
+            }
+            pc += 2;
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
