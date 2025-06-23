@@ -96,23 +96,39 @@ void cycle()
     switch(opcode & 0xF000) {
         case 0x0000:
             switch (opcode & 0x00FF) {
-                case 0x00E0: // 0x00E0 - CLS - Clear the screen
+                case 0x00E0: // 00E0 - CLS - Clear the screen
                     for (int i = 0; i < 2048; i++) gfx[i] = 0;
                     drawFlag = true;
                     pc += 2;
                     break;
-                case 0x00EE: // 0x00EE - RET - Return from subroutine
+                case 0x00EE: // 00EE - RET - Return from subroutine
                     if (sp == 0) {
                         printf("Stack underflow!\n");
-                        return;
                     }
-                    pc = stack[sp];
                     sp--;
+                    pc = stack[sp];
                     break;
                 default:
                     printf("Unknown opcode: 0x%X\n", opcode);
                     break;
             }
+            break;
+        case 0x1000: // 1NNN - JP addr - Jump to location NNN
+            pc = opcode & 0x0FFF;
+            break;
+        case 0x2000: // 2NNN - Call addr - Call subroutine at NNN
+            if (sp == 16) {
+              printf("Stack overflow!\n");
+            }
+            stack[sp] = pc;
+            sp++;
+            pc = opcode & 0x0FFF;
+            break;
+        case 0x3000: // 3XKK - SE Vx, byte - Skip next instruction if Vx = kk
+            if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
+              pc += 2;
+            }
+            pc += 2;
             break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
