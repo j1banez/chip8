@@ -150,6 +150,51 @@ void cycle()
             V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
             pc += 2;
             break;
+        case 0x8000:
+            switch(opcode & 0x000F) {
+              case 0x0000: // 8XY0 - LD Vx, Vy - Set Vx = Vy
+                V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+                pc += 2;
+                break;
+              case 0x0001: // 8XY1 - OR Vx, Vy - Set Vx = Vx OR Vy
+                V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
+                pc += 2;
+                break;
+              case 0x0002: // 8XY2 - AND Vx, Vy - Set Vx = Vx AND Vy
+                V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
+                pc += 2;
+                break;
+              case 0x0003: // 8XY3 - XOR Vx, Vy - Set Vx = Vx XOR Vy
+                V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
+                pc += 2;
+                break;
+              case 0x0004: // 8XY4 - ADD Vx, Vy - Set Vx = Vx + Vy, set VF = carry
+                V[0xF] = V[(opcode & 0x0F00) >> 8] > (255 - V[(opcode & 0x00F0 >> 4)]) ? 1 : 0;
+                V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
+                pc += 2;
+                break;
+              case 0x0005: // 8XY5 - SUB Vx, Vy - Set Vx = Vx - Vy, set VF = NOT borrow
+                V[0xF] = V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0 >> 4)] ? 1 : 0;
+                V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
+                pc += 2;
+                break;
+              case 0x0006: // 8XY6 - SHR Vx {, Vy} - Set Vx = Vx SHR 1
+                V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
+                V[(opcode & 0x0F00) >> 8] >>= 1;
+                pc += 2;
+                break;
+              case 0x0007: // 8XY7 - SUBN Vx, Vy - Set Vx = Vy - Vx, set VF = NOT borrow
+                V[0xF] = V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00 >> 8)] ? 1 : 0;
+                V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
+                pc += 2;
+                break;
+              case 0x000E: // 8XYE - SHL Vx {, Vy} - Set Vx = Vx SHL 1
+                V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
+                V[(opcode & 0x0F00) >> 8] <<= 1;
+                pc += 2;
+                break;
+            }
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
