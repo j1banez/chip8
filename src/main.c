@@ -146,6 +146,10 @@ void cycle()
             V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
             pc += 2;
             break;
+        case 0x7000: // 7xkk - ADD Vx, byte - Set Vx = Vx + kk
+            V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+            pc += 2;
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
