@@ -9,7 +9,7 @@
 const int FRAME_DELAY = 1000 / 60; // ~16.67 ms per frame (60 FPS)
 
 typedef unsigned char t_byte;
-typedef unsigned short t_word;
+typedef unsigned short t_word; // Two bytes
 
 t_byte memory[4096];
 
