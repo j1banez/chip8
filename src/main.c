@@ -195,6 +195,12 @@ void cycle()
                 break;
             }
             break;
+        case 0x9000: // 9XY0 - SNE Vx, Vy - Skip next instruction if Vx != Vy
+            if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
+              pc += 2;
+            }
+            pc += 2;
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
