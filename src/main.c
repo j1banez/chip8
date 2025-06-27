@@ -172,12 +172,12 @@ void cycle()
                 pc += 2;
                 break;
               case 0x0004: // 8XY4 - ADD Vx, Vy - Set Vx = Vx + Vy, set VF = carry
-                V[0xF] = V[(opcode & 0x0F00) >> 8] > (255 - V[(opcode & 0x00F0 >> 4)]) ? 1 : 0;
+                V[0xF] = V[(opcode & 0x0F00) >> 8] > (255 - V[(opcode & 0x00F0) >> 4]) ? 1 : 0;
                 V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
                 pc += 2;
                 break;
               case 0x0005: // 8XY5 - SUB Vx, Vy - Set Vx = Vx - Vy, set VF = NOT borrow
-                V[0xF] = V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0 >> 4)] ? 1 : 0;
+                V[0xF] = V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4] ? 1 : 0;
                 V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
                 pc += 2;
                 break;
@@ -187,7 +187,7 @@ void cycle()
                 pc += 2;
                 break;
               case 0x0007: // 8XY7 - SUBN Vx, Vy - Set Vx = Vy - Vx, set VF = NOT borrow
-                V[0xF] = V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00 >> 8)] ? 1 : 0;
+                V[0xF] = V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8] ? 1 : 0;
                 V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
                 pc += 2;
                 break;
