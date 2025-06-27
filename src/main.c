@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include <SDL2/SDL.h>
 
 #define SCREEN_WIDTH 640
@@ -73,6 +75,7 @@ void init()
     for (int i = 0; i < 80; i++) memory[i] = fontset[i];
 
     drawFlag = true;
+    srand(time(NULL));
 }
 
 int load_game(const char* filename)
@@ -202,11 +205,15 @@ void cycle()
             pc += 2;
             break;
         case 0xA000: // ANNN - LD I, addr - Set I = nnn
-            I = opcode & 0x0FFF
+            I = opcode & 0x0FFF;
             pc += 2;
             break;
         case 0xB000: // BNNN - JP V0, addr - Jump to location nnn + V0
             pc = (opcode & 0x0FFF) + V[0];
+            break;
+        case 0xC000: // CXKK - RND Vx, byte - Set Vx = random byte AND kk
+            V[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
+            pc += 2;
             break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
