@@ -205,6 +205,9 @@ void cycle()
             I = opcode & 0x0FFF
             pc += 2;
             break;
+        case 0xB000: // BNNN - JP V0, addr - Jump to location nnn + V0
+            pc = (opcode & 0x0FFF) + V[0];
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
