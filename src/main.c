@@ -201,6 +201,10 @@ void cycle()
             }
             pc += 2;
             break;
+        case 0xA000: // ANNN - LD I, addr - Set I = nnn
+            I = opcode & 0x0FFF
+            pc += 2;
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
