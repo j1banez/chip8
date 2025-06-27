@@ -107,6 +107,7 @@ void cycle()
                 case 0x00EE: // 00EE - RET - Return from subroutine
                     if (sp == 0) {
                         printf("Stack underflow!\n");
+                        exit(1);
                     }
                     sp--;
                     pc = stack[sp];
@@ -122,6 +123,7 @@ void cycle()
         case 0x2000: // 2NNN - Call addr - Call subroutine at NNN
             if (sp == 16) {
               printf("Stack overflow!\n");
+              exit(1);
             }
             stack[sp] = pc;
             sp++;
