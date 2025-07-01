@@ -31,7 +31,7 @@ t_byte sound_timer;
 t_byte key[16]; // Keypad state, 0 if not pressed, 1 if pressed
 
 t_byte gfx[64 * 32]; // Screen buffer
-bool drawFlag;
+bool draw_flag;
 SDL_Renderer* renderer;
 
 t_byte fontset[80] =
@@ -74,7 +74,7 @@ void init()
     // Load fontset
     for (int i = 0; i < 80; i++) memory[i] = fontset[i];
 
-    drawFlag = true;
+    draw_flag = true;
     srand(time(NULL));
 }
 
@@ -101,7 +101,7 @@ void cycle()
             switch (opcode & 0x00FF) {
                 case 0x00E0: // 00E0 - CLS - Clear the screen
                     for (int i = 0; i < 2048; i++) gfx[i] = 0;
-                    drawFlag = true;
+                    draw_flag = true;
                     pc += 2;
                     break;
                 case 0x00EE: // 00EE - RET - Return from subroutine
@@ -217,6 +217,33 @@ void cycle()
             V[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
             pc += 2;
             break;
+        // DXYN - DRW Vx, Vy, nibble Display n-byte sprite starting
+        // at memory location I at (Vx, Vy), set VF = collision
+        case 0xD000: {
+            t_byte x = (opcode & 0x0F00) >> 8;
+            t_byte y = (opcode & 0x00F0) >> 4;
+            t_byte n = opcode & 0x000F;
+            t_byte sprite_line;
+
+            V[0xF] = 0;
+
+            // Loop over sprite height (n)
+            for (int i = 0; i < n; i++) {
+                sprite_line = memory[I] + i;
+                // Loop over sprite width, always 8
+                for (int j = 0; j < 8; j++) {
+                    // Compare each pixel of the current sprite line
+                    if ((sprite_line & (0x80 >> j)) == 1) {
+                        V[0xF] = gfx[((y + i) * 64) + x + j];
+                        gfx[((y + i) * 64) + x + j] ^= 1;
+                    }
+                }
+            }
+
+            draw_flag = true;
+            pc += 2;
+            break;
+        }
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
@@ -259,9 +286,16 @@ int map_sdl_key(SDL_Keycode key) {
 void draw()
 {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    // TODO: use gfx array to draw pixels
-    SDL_Rect pixel = {10, 10, 10, 10};
-    SDL_RenderFillRect(renderer, &pixel);
+
+    for (int i = 0; i < 2048; i++) {
+      if (gfx[i]) {
+        int x = i % 64;
+        int y = i / 64;
+        // x10 scaling
+        SDL_Rect pixel = {x * 10, y * 10, 10, 10};
+        SDL_RenderFillRect(renderer, &pixel);
+      }
+    }
 }
 
 int main(int argc, char* argv[])
@@ -331,13 +365,13 @@ int main(int argc, char* argv[])
             sound_timer--;
         }
 
-        if (drawFlag) {
+        if (draw_flag) {
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
             draw();
             SDL_RenderPresent(renderer);
 
-            drawFlag = 0;
+            draw_flag = 0;
         }
 
         // Delay to maintain frame rate at ~60 FPS
