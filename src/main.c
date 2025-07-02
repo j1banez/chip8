@@ -244,6 +244,29 @@ void cycle()
             pc += 2;
             break;
         }
+        case 0xE000:
+            switch (opcode & 0x000F) {
+                // EX9E - SKP Vx
+                // Skip next instruction if key with the value of Vx is pressed
+                case 0x000E:
+                    if (key[V[(opcode & 0x0F00) >> 8]] == 1) {
+                        pc += 2;
+                    }
+                    pc += 2;
+                    break;
+                // EXA1 - SKNP Vx
+                // Skip next instruction if key with the value of Vx is not pressed
+                case 0x0001:
+                    if (key[V[(opcode & 0x0F00) >> 8]] == 0) {
+                        pc += 2;
+                    }
+                    pc += 2;
+                    break;
+                default:
+                    printf("Unknown opcode: 0x%X\n", opcode);
+                    break;
+            }
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
