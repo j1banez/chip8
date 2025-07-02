@@ -267,6 +267,80 @@ void cycle()
                     break;
             }
             break;
+        case 0xF000:
+            switch (opcode & 0x00FF) {
+                // FX07 - LD Vx, DT - Set Vx = delay timer value
+                case 0x0007:
+                    V[(opcode & 0x0F00) >> 8] = delay_timer;
+                    pc += 2;
+                    break;
+                // FX0A - LD Vx, K
+                // Wait for a key press, store the value of the key in Vx
+                case 0x000A:
+                    for (int i = 0; i < 16; i++) {
+                        if (key[i] == 1) {
+                            V[(opcode & 0x0F00) >> 8] = i;
+                            pc += 2;
+                        }
+                    }
+                    break;
+                // FX15 - LD DT, Vx - Set delay timer = Vx
+                case 0x0015:
+                    delay_timer = V[(opcode & 0x0F00) >> 8];
+                    pc += 2;
+                    break;
+                // FX18 - LD ST, Vx - Set sound timer = Vx
+                case 0x0018:
+                    sound_timer = V[(opcode & 0x0F00) >> 8];
+                    pc += 2;
+                    break;
+                // FX1E - ADD I, Vx - Set I = I + Vx
+                case 0x001E:
+                    I = I + V[(opcode && 0x0F00) >> 8];
+                    pc += 2;
+                    break;
+                // FX29 - LD F, Vx - Set I = location of sprite for digit Vx
+                case 0x0029:
+                    I = V[(opcode && 0x0F00) >> 8] * 5;
+                    pc =+ 2;
+                    break;
+                // FX33 - LD B, Vx
+                // Store BCD representation of Vx in memory locations I, I+1, and I+2
+                case 0x0033: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+                    memory[I] = V[x] / 100;
+					memory[I + 1] = (V[x] / 10) % 10;
+					memory[I + 2] = (V[x] % 100) % 10;
+					pc += 2;
+                    break;
+                }
+                // FX55 - LD [I], Vx
+                // Store registers V0 through Vx in memory starting at location I
+                case 0x0055: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+
+                    for (int i = 0; i <= x; i++) {
+                        memory[I + i] = V[i];
+                    }
+                    pc += 2;
+                    break;
+                }
+                // FX65 - LD Vx, [I]
+                // Read registers V0 through Vx from memory starting at location I
+                case 0x0065: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+
+                    for (int i = 0; i <= x; i++) {
+                        V[i] = memory[I + i];
+                    }
+                    pc += 2;
+                    break;
+                }
+                default:
+                    printf("Unknown opcode: 0x%X\n", opcode);
+                    break;
+            }
+            break;
         default:
             printf("Unknown opcode: 0x%X\n", opcode);
             break;
