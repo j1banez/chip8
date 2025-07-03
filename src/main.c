@@ -301,12 +301,12 @@ void cycle()
                     break;
                 // FX1E - ADD I, Vx - Set I = I + Vx
                 case 0x001E:
-                    I = I + V[(opcode && 0x0F00) >> 8];
+                    I = I + V[(opcode & 0x0F00) >> 8];
                     pc += 2;
                     break;
                 // FX29 - LD F, Vx - Set I = location of sprite for digit Vx
                 case 0x0029:
-                    I = V[(opcode && 0x0F00) >> 8] * 5;
+                    I = V[(opcode & 0x0F00) >> 8] * 5;
                     pc =+ 2;
                     break;
                 // FX33 - LD B, Vx
