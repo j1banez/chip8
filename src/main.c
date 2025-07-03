@@ -95,6 +95,8 @@ void cycle()
     // Fetch opcode
     opcode = memory[pc] << 8 | memory[pc + 1];
 
+    printf("PC: %03X OPCODE: %04X\n", pc, opcode);
+
     // Decode opcode and execute
     switch(opcode & 0xF000) {
         case 0x0000:
@@ -307,7 +309,7 @@ void cycle()
                 // FX29 - LD F, Vx - Set I = location of sprite for digit Vx
                 case 0x0029:
                     I = V[(opcode & 0x0F00) >> 8] * 5;
-                    pc =+ 2;
+                    pc += 2;
                     break;
                 // FX33 - LD B, Vx
                 // Store BCD representation of Vx in memory locations I, I+1, and I+2
