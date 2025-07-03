@@ -229,13 +229,17 @@ void cycle()
 
             // Loop over sprite height (n)
             for (int i = 0; i < n; i++) {
-                sprite_line = memory[I] + i;
+                sprite_line = memory[I + i];
                 // Loop over sprite width, always 8
                 for (int j = 0; j < 8; j++) {
                     // Compare each pixel of the current sprite line
-                    if ((sprite_line & (0x80 >> j)) == 1) {
-                        V[0xF] = gfx[((y + i) * 64) + x + j];
-                        gfx[((y + i) * 64) + x + j] ^= 1;
+                    if (sprite_line & (0x80 >> j)) {
+                        // Handle screen warping
+                        int px = (x + j) % 64;
+                        int py = (y + i) % 32;
+
+                        if (gfx[(py * 64) + px] == 1) V[0xF] = 1;
+                        gfx[(py * 64) + px] ^= 1;
                     }
                 }
             }
