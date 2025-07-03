@@ -237,8 +237,8 @@ void cycle()
                     // Compare each pixel of the current sprite line
                     if (sprite_line & (0x80 >> j)) {
                         // Handle screen warping
-                        int px = (x + j) % 64;
-                        int py = (y + i) % 32;
+                        int px = (V[x] + j) % 64;
+                        int py = (V[y] + i) % 32;
 
                         if (gfx[(py * 64) + px] == 1) V[0xF] = 1;
                         gfx[(py * 64) + px] ^= 1;
