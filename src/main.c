@@ -282,9 +282,10 @@ void cycle()
                 // Wait for a key press, store the value of the key in Vx
                 case 0x000A:
                     for (int i = 0; i < 16; i++) {
-                        if (key[i] == 1) {
+                        if (key[i]) {
                             V[(opcode & 0x0F00) >> 8] = i;
                             pc += 2;
+                            break;
                         }
                     }
                     break;
