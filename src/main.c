@@ -127,7 +127,8 @@ void cycle()
               printf("Stack overflow!\n");
               exit(1);
             }
-            stack[sp] = pc;
+            // Set to the next instruction to avoid infinite loop when returning.
+            stack[sp] = pc + 2;
             sp++;
             pc = opcode & 0x0FFF;
             break;
