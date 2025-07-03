@@ -325,7 +325,7 @@ void cycle()
                     t_byte x = (opcode & 0x0F00) >> 8;
                     memory[I] = V[x] / 100;
 					memory[I + 1] = (V[x] / 10) % 10;
-					memory[I + 2] = (V[x] % 100) % 10;
+					memory[I + 2] = V[x] % 10;
 					pc += 2;
                     break;
                 }
