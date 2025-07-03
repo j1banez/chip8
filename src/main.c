@@ -282,15 +282,23 @@ void cycle()
                     break;
                 // FX0A - LD Vx, K
                 // Wait for a key press, store the value of the key in Vx
-                case 0x000A:
+                case 0x000A: {
+                    bool key_pressed = false;
+
                     for (int i = 0; i < 16; i++) {
                         if (key[i]) {
                             V[(opcode & 0x0F00) >> 8] = i;
                             pc += 2;
+                            key_pressed = true;
                             break;
                         }
                     }
+
+                    // Ensure this cycle does not continue
+                    if (!key_pressed) return;
+
                     break;
+                }
                 // FX15 - LD DT, Vx - Set delay timer = Vx
                 case 0x0015:
                     delay_timer = V[(opcode & 0x0F00) >> 8];
