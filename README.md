@@ -7,7 +7,7 @@ Just my implementation of a [Chip-8](https://en.wikipedia.org/wiki/CHIP-8) inter
 ```sh
 sudo apt install libsdl2-dev
 make
-./chip8 games/invaders.c8
+./chip8 roms/invaders.c8
 ```
 
 # Links
