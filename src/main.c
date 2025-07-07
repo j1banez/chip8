@@ -171,16 +171,19 @@ void cycle()
                 // 8XY1 - OR Vx, Vy - Set Vx = Vx OR Vy
                 case 0x0001:
                     V[x] |= V[y];
+                    V[0xF] = 0; // https://chip8.gulrak.net/#quirk5
                     pc += 2;
                     break;
                 // 8XY2 - AND Vx, Vy - Set Vx = Vx AND Vy
                 case 0x0002:
                     V[x] &= V[y];
+                    V[0xF] = 0; // https://chip8.gulrak.net/#quirk5
                     pc += 2;
                     break;
                 // 8XY3 - XOR Vx, Vy - Set Vx = Vx XOR Vy
                 case 0x0003:
                     V[x] ^= V[y];
+                    V[0xF] = 0; // https://chip8.gulrak.net/#quirk5
                     pc += 2;
                     break;
                 // 8XY4 - ADD Vx, Vy - Set Vx = Vx + Vy, set VF = carry
