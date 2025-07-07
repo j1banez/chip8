@@ -160,47 +160,74 @@ void cycle()
             break;
         case 0x8000:
             switch(opcode & 0x000F) {
-              case 0x0000: // 8XY0 - LD Vx, Vy - Set Vx = Vy
-                V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
-                pc += 2;
-                break;
-              case 0x0001: // 8XY1 - OR Vx, Vy - Set Vx = Vx OR Vy
-                V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
-                pc += 2;
-                break;
-              case 0x0002: // 8XY2 - AND Vx, Vy - Set Vx = Vx AND Vy
-                V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
-                pc += 2;
-                break;
-              case 0x0003: // 8XY3 - XOR Vx, Vy - Set Vx = Vx XOR Vy
-                V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
-                pc += 2;
-                break;
-              case 0x0004: // 8XY4 - ADD Vx, Vy - Set Vx = Vx + Vy, set VF = carry
-                V[0xF] = V[(opcode & 0x0F00) >> 8] > (255 - V[(opcode & 0x00F0) >> 4]) ? 1 : 0;
-                V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
-                pc += 2;
-                break;
-              case 0x0005: // 8XY5 - SUB Vx, Vy - Set Vx = Vx - Vy, set VF = NOT borrow
-                V[0xF] = V[(opcode & 0x0F00) >> 8] >= V[(opcode & 0x00F0) >> 4] ? 1 : 0;
-                V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
-                pc += 2;
-                break;
-              case 0x0006: // 8XY6 - SHR Vx {, Vy} - Set Vx = Vx SHR 1
-                V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
-                V[(opcode & 0x0F00) >> 8] >>= 1;
-                pc += 2;
-                break;
-              case 0x0007: // 8XY7 - SUBN Vx, Vy - Set Vx = Vy - Vx, set VF = NOT borrow
-                V[0xF] = V[(opcode & 0x00F0) >> 4] >= V[(opcode & 0x0F00) >> 8] ? 1 : 0;
-                V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
-                pc += 2;
-                break;
-              case 0x000E: // 8XYE - SHL Vx {, Vy} - Set Vx = Vx SHL 1
-                V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
-                V[(opcode & 0x0F00) >> 8] <<= 1;
-                pc += 2;
-                break;
+                // 8XY0 - LD Vx, Vy - Set Vx = Vy
+                case 0x0000:
+                    V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+                    pc += 2;
+                    break;
+                // 8XY1 - OR Vx, Vy - Set Vx = Vx OR Vy
+                case 0x0001:
+                    V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
+                    pc += 2;
+                    break;
+                // 8XY2 - AND Vx, Vy - Set Vx = Vx AND Vy
+                case 0x0002:
+                    V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
+                    pc += 2;
+                    break;
+                // 8XY3 - XOR Vx, Vy - Set Vx = Vx XOR Vy
+                case 0x0003:
+                    V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
+                    pc += 2;
+                    break;
+                // 8XY4 - ADD Vx, Vy - Set Vx = Vx + Vy, set VF = carry
+                case 0x0004: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+                    t_byte y = (opcode & 0x00F0) >> 4;
+                    t_byte tmp = V[x];
+                    V[x] += V[y];
+                    V[0xF] = tmp > (255 - V[y]) ? 1 : 0;
+                    pc += 2;
+                    break;
+                }
+                // 8XY5 - SUB Vx, Vy - Set Vx = Vx - Vy, set VF = NOT borrow
+                case 0x0005: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+                    t_byte y = (opcode & 0x00F0) >> 4;
+                    t_byte tmp = V[x];
+                    V[x] -= V[y];
+                    V[0xF] = tmp >= V[y] ? 1 : 0;
+                    pc += 2;
+                    break;
+                }
+                // 8XY6 - SHR Vx {, Vy} - Set Vx = Vx SHR 1
+                case 0x0006: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+                    t_byte tmp = V[x];
+                    V[x] >>= 1;
+                    V[0xF] = tmp & 0x1;
+                    pc += 2;
+                    break;
+                }
+                // 8XY7 - SUBN Vx, Vy - Set Vx = Vy - Vx, set VF = NOT borrow
+                case 0x0007: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+                    t_byte y = (opcode & 0x00F0) >> 4;
+                    t_byte tmp = V[x];
+                    V[x] = V[y] - V[x];
+                    V[0xF] = V[y] >= tmp ? 1 : 0;
+                    pc += 2;
+                    break;
+                }
+                // 8XYE - SHL Vx {, Vy} - Set Vx = Vx SHL 1
+                case 0x000E: {
+                    t_byte x = (opcode & 0x0F00) >> 8;
+                    t_byte tmp = V[x];
+                    V[x] <<= 1;
+                    V[0xF] = tmp >> 7;
+                    pc += 2;
+                    break;
+                }
             }
             break;
         case 0x9000: // 9XY0 - SNE Vx, Vy - Skip next instruction if Vx != Vy
